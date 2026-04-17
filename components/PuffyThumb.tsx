@@ -44,9 +44,10 @@ interface PuffyThumbProps {
   colors: VibeColorScheme
   onShortPress: () => void
   onLongPress: () => void
+  restartKey?: number
 }
 
-export default function PuffyThumb({ day, colors, onShortPress, onLongPress }: PuffyThumbProps) {
+export default function PuffyThumb({ day, colors, onShortPress, onLongPress, restartKey = 0 }: PuffyThumbProps) {
   const [pressProgress, setPressProgress] = useState(0)
   const isAnimating = useRef(false)
   const { pop: hapticPop, pumpStart, pumpStop } = useHaptic()
@@ -75,6 +76,12 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress }: P
   useEffect(() => {
     startBreathing()
   }, [startBreathing])
+
+  useEffect(() => {
+    if (restartKey === 0) return
+    isAnimating.current = false
+    startBreathing()
+  }, [restartKey, startBreathing])
 
   // ── 短按：充气弹起 → 飞入海报 ────────────────────────────
   const handleShortPress = async () => {

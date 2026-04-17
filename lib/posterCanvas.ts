@@ -336,26 +336,27 @@ function drawDayText(
     ctx.restore()
   }
 
-  // 测量两段文字宽度，使它们在视觉上居中
+  // 测量三段文字宽度，使它们在视觉上居中
   ctx.font = `300 ${fontSize}px Inter, system-ui, sans-serif`
-  const dayLabelW = ctx.measureText("DAY ").width
+  const prefixW = ctx.measureText("已经点赞了").width
+  const suffixW = ctx.measureText("天").width
   ctx.font = `800 ${fontSize}px Inter, system-ui, sans-serif`
   const numW = ctx.measureText(numStr).width
-  const totalW = dayLabelW + numW
+  const totalW = prefixW + numW + suffixW
   const startX = W / 2 - totalW / 2
 
-  // 绘制 "DAY "（轻字重）
+  // 轻字重颜色
+  const lightFill = stage === "outline"
+    ? `rgba(${r},${g},${b},0.38)`
+    : stage === "glow"
+      ? `rgba(255,255,255,0.38)`
+      : `rgba(255,255,255,0.42)`
+
+  // 绘制 "已经点赞了"（轻字重）
   ctx.font = `300 ${fontSize}px Inter, system-ui, sans-serif`
   ctx.textAlign = "left"
-  switch (stage) {
-    case "outline":
-      ctx.fillStyle = `rgba(${r},${g},${b},0.38)`; break
-    case "glow":
-      ctx.fillStyle = `rgba(255,255,255,0.38)`; break
-    default:
-      ctx.fillStyle = `rgba(255,255,255,0.42)`
-  }
-  ctx.fillText("DAY ", startX, cy)
+  ctx.fillStyle = lightFill
+  ctx.fillText("已经点赞了", startX, cy)
 
   // 绘制数字（重字重）
   ctx.font = `800 ${fontSize}px Inter, system-ui, sans-serif`
@@ -370,8 +371,13 @@ function drawDayText(
       ? "rgba(255,255,255,0.9)"
       : "rgba(255,255,255,0.95)"
   }
-  ctx.fillText(numStr, startX + dayLabelW, cy)
+  ctx.fillText(numStr, startX + prefixW, cy)
   ctx.shadowBlur = 0
+
+  // 绘制 "天"（轻字重）
+  ctx.font = `300 ${fontSize}px Inter, system-ui, sans-serif`
+  ctx.fillStyle = lightFill
+  ctx.fillText("天", startX + prefixW + numW, cy)
 
   ctx.restore()
 }
@@ -455,7 +461,7 @@ async function drawSelfiePoster(
   ctx.font = `700 ${W * 0.05}px Inter, system-ui, sans-serif`
   ctx.textAlign = "left"
   ctx.textBaseline = "top"
-  ctx.fillText(`DAY ${day}`, W * 0.08, H * 0.07)
+  ctx.fillText(`已经点赞了${day}天`, W * 0.08, H * 0.07)
   ctx.restore()
 
   // 语录（底部）

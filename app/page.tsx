@@ -10,10 +10,11 @@ import PosterModal from "@/components/PosterModal"
 import SelfieMode from "@/components/SelfieMode"
 
 export default function Home() {
-  const colors = useVibeColor()
   const { day, checkIn } = useStreak()
+  const colors = useVibeColor(day)
   const [mode, setMode] = useState<"idle" | "poster" | "selfie" | "photo">("idle")
   const [capturedPhoto, setCapturedPhoto] = useState<string | undefined>()
+  const [thumbRestartKey, setThumbRestartKey] = useState(0)
 
   const handleShortPress = () => {
     checkIn()
@@ -32,6 +33,7 @@ export default function Home() {
   const handleClose = () => {
     setMode("idle")
     setCapturedPhoto(undefined)
+    setThumbRestartKey((k) => k + 1)
   }
 
   return (
@@ -45,7 +47,7 @@ export default function Home() {
           className="font-black leading-none"
           style={{
             fontSize: "clamp(5rem, 22vw, 18rem)",
-            color: "rgba(255,255,255,0.07)",
+            color: "rgba(255,255,255,0.14)",
             letterSpacing: "-0.04em",
             lineHeight: 0.9,
           }}
@@ -56,7 +58,7 @@ export default function Home() {
           className="font-black"
           style={{
             fontSize: "clamp(6rem, 30vw, 24rem)",
-            color: "rgba(255,255,255,0.07)",
+            color: "rgba(255,255,255,0.14)",
             letterSpacing: "-0.05em",
             lineHeight: 0.85,
           }}
@@ -105,6 +107,7 @@ export default function Home() {
           colors={colors}
           onShortPress={handleShortPress}
           onLongPress={handleLongPress}
+          restartKey={thumbRestartKey}
         />
       </div>
 
