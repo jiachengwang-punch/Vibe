@@ -1,65 +1,126 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { useVibeColor } from "@/hooks/useVibeColor"
+import { useStreak } from "@/hooks/useStreak"
+// motion is used for ambient orbs below
+import PuffyThumb from "@/components/PuffyThumb"
+import PosterModal from "@/components/PosterModal"
+import SelfieMode from "@/components/SelfieMode"
 
 export default function Home() {
+  const colors = useVibeColor()
+  const { day, checkIn } = useStreak()
+  const [mode, setMode] = useState<"idle" | "poster" | "selfie" | "photo">("idle")
+  const [capturedPhoto, setCapturedPhoto] = useState<string | undefined>()
+
+  const handleShortPress = () => {
+    checkIn()
+    setMode("poster")
+  }
+  const handleLongPress = () => {
+    checkIn()
+    setMode("selfie")
+  }
+
+  const handleCapture = (dataUrl: string) => {
+    setCapturedPhoto(dataUrl)
+    setMode("photo")
+  }
+
+  const handleClose = () => {
+    setMode("idle")
+    setCapturedPhoto(undefined)
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main
+      className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: `linear-gradient(145deg, ${colors.bg} 0%, ${colors.bgEnd} 100%)` }}
+    >
+      {/* DAY ghost text */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+        <span
+          className="font-black leading-none"
+          style={{
+            fontSize: "clamp(5rem, 22vw, 18rem)",
+            color: "rgba(255,255,255,0.07)",
+            letterSpacing: "-0.04em",
+            lineHeight: 0.9,
+          }}
+        >
+          DAY
+        </span>
+        <span
+          className="font-black"
+          style={{
+            fontSize: "clamp(6rem, 30vw, 24rem)",
+            color: "rgba(255,255,255,0.07)",
+            letterSpacing: "-0.05em",
+            lineHeight: 0.85,
+          }}
+        >
+          {day}
+        </span>
+      </div>
+
+      {/* Ambient orbs */}
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: "45vw",
+          height: "45vw",
+          maxWidth: 420,
+          maxHeight: 420,
+          background: `radial-gradient(circle, ${colors.accentGlow} 0%, transparent 70%)`,
+          top: "-10%",
+          right: "-10%",
+          filter: "blur(60px)",
+        }}
+        animate={{ scale: [1, 1.12, 1], opacity: [0.6, 0.9, 0.6] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: "35vw",
+          height: "35vw",
+          maxWidth: 320,
+          maxHeight: 320,
+          background: `radial-gradient(circle, ${colors.bg} 0%, transparent 70%)`,
+          bottom: "-8%",
+          left: "-8%",
+          filter: "blur(50px)",
+          opacity: 0.5,
+        }}
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      />
+
+      {/* Main */}
+      <div className="relative z-10 flex items-center justify-center">
+        <PuffyThumb
+          day={day}
+          colors={colors}
+          onShortPress={handleShortPress}
+          onLongPress={handleLongPress}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </div>
+
+      <SelfieMode
+        open={mode === "selfie"}
+        colors={colors}
+        onCapture={handleCapture}
+        onClose={handleClose}
+      />
+      <PosterModal
+        open={mode === "poster" || mode === "photo"}
+        day={day}
+        colors={colors}
+        photo={mode === "photo" ? capturedPhoto : undefined}
+        onClose={handleClose}
+      />
+    </main>
+  )
 }
