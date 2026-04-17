@@ -51,14 +51,14 @@ function computeVibeColor(hour: number): VibeColorScheme {
       thumbTint: "#FFD93D",
     }
   } else {
-    // Night: Klein blue + aurora teal
+    // Night: electric purple + deep violet（告别压抑深蓝，换成多巴胺紫）
     return {
-      bg: "#0D1B8E",
-      bgEnd: "#001535",
-      accent: "#00E5FF",
-      accentGlow: "rgba(0,229,255,0.4)",
-      text: "#E0F7FF",
-      thumbTint: "#00E5FF",
+      bg: "#9B35E8",
+      bgEnd: "#5B21B6",
+      accent: "#F5D0FE",
+      accentGlow: "rgba(245,208,254,0.45)",
+      text: "#FFFFFF",
+      thumbTint: "#F0ABFC",
     }
   }
 }

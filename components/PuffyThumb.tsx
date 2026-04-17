@@ -130,16 +130,16 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress }: P
   const squishX = 1 + pressProgress * 0.30
   const squishY = 1 - pressProgress * 0.30
 
-  // 各阶段 CSS filter
+  // 各阶段 CSS filter：三层 drop-shadow 叠出充气体积感
   const EMOJI_FILTER: Record<ThumbStage, string> = {
     rubber:
-      "saturate(0.28) brightness(0.82) drop-shadow(0 6px 12px rgba(0,0,0,0.18))",
+      "saturate(0.28) brightness(0.84) drop-shadow(0 2px 0 rgba(0,0,0,0.28)) drop-shadow(0 6px 10px rgba(0,0,0,0.16)) drop-shadow(0 16px 28px rgba(0,0,0,0.10))",
     latex:
-      "saturate(1.22) brightness(1.08) drop-shadow(0 10px 26px rgba(0,0,0,0.22))",
+      "saturate(1.25) brightness(1.10) drop-shadow(0 3px 0 rgba(0,0,0,0.32)) drop-shadow(0 10px 18px rgba(0,0,0,0.22)) drop-shadow(0 28px 48px rgba(0,0,0,0.14))",
     metal:
-      "saturate(0.06) brightness(1.70) contrast(1.28) drop-shadow(0 8px 24px rgba(200,200,210,0.38))",
+      "saturate(0.06) brightness(1.72) contrast(1.28) drop-shadow(0 3px 0 rgba(0,0,0,0.35)) drop-shadow(0 10px 20px rgba(180,180,200,0.45)) drop-shadow(0 28px 50px rgba(150,150,180,0.22))",
     jelly:
-      "brightness(1.12) saturate(0.42) opacity(0.74) drop-shadow(0 6px 20px rgba(130,70,255,0.30))",
+      "brightness(1.14) saturate(0.45) opacity(0.76) drop-shadow(0 3px 0 rgba(100,0,200,0.22)) drop-shadow(0 10px 20px rgba(120,60,255,0.30)) drop-shadow(0 28px 48px rgba(80,0,200,0.16))",
   }
 
   // 光晕颜色
@@ -191,14 +191,15 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress }: P
             <div style={{ position: "relative", display: "inline-block", fontSize: 0, lineHeight: 0 }}>
               <span
                 style={{
-                  fontSize: "140px",
-                  lineHeight: "140px",
+                  fontSize: stage === "rubber" ? "144px" : stage === "latex" ? "164px" : "158px",
+                  lineHeight: stage === "rubber" ? "144px" : stage === "latex" ? "164px" : "158px",
                   display: "block",
                   filter: EMOJI_FILTER[stage],
                 }}
               >
                 👍
               </span>
+              {/* rubber 无高光（雾面不反光） */}
               {stage === "latex" && <LatexGloss />}
               {stage === "metal" && <MetalShimmer />}
               {stage === "jelly" && <JellyRainbow />}
@@ -251,14 +252,26 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress }: P
 /** 高光乳胶：左上角强高光 */
 function LatexGloss() {
   return (
-    <div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          "radial-gradient(ellipse 62% 52% at 33% 22%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.18) 36%, transparent 58%)",
-        mixBlendMode: "overlay",
-      }}
-    />
+    <>
+      {/* 主高光：screen 混合比 overlay 更亮，更像气球反光 */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 58% 48% at 31% 20%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.38) 28%, transparent 52%)",
+          mixBlendMode: "screen",
+        }}
+      />
+      {/* 底部暗边：增强球体弧面感 */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 62% 82%, rgba(0,0,0,0.18) 0%, transparent 55%)",
+          mixBlendMode: "multiply",
+        }}
+      />
+    </>
   )
 }
 

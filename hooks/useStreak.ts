@@ -45,13 +45,12 @@ export function useStreak() {
   }, [])
 
   const checkIn = () => {
-    const today = todayStr()
+    // DEV MODE: 每次短按都 +1 天，方便测试材质进化
+    // 上线前将此处改回限制：if (data.lastCheckedIn === todayStr()) return
     const data = load()
-    if (data.lastCheckedIn === today) return // already done
-
     const updated: StreakData = {
       day: data.day + 1,
-      lastCheckedIn: today,
+      lastCheckedIn: todayStr(),
     }
     save(updated)
     setStreak(updated)
