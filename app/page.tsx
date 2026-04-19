@@ -15,6 +15,7 @@ export default function Home() {
   const [mode, setMode] = useState<"idle" | "poster" | "selfie" | "photo">("idle")
   const [capturedPhoto, setCapturedPhoto] = useState<string | undefined>()
   const [thumbRestartKey, setThumbRestartKey] = useState(0)
+  const [burstKey, setBurstKey] = useState(0)
 
   const handleShortPress = () => {
     checkIn()
@@ -31,6 +32,7 @@ export default function Home() {
   }
 
   const handleClose = () => {
+    if (mode === "photo") setBurstKey((k) => k + 1)
     setMode("idle")
     setCapturedPhoto(undefined)
     setThumbRestartKey((k) => k + 1)
@@ -108,6 +110,7 @@ export default function Home() {
           onShortPress={handleShortPress}
           onLongPress={handleLongPress}
           restartKey={thumbRestartKey}
+          burstKey={burstKey}
         />
       </div>
 
