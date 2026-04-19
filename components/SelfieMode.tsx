@@ -13,39 +13,57 @@ interface SelfieProps {
 
 export default function SelfieMode({ open, colors, onCapture, onClose }: SelfieProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const [ready, setReady] = useState(false)
   const [flash, setFlash] = useState(false)
   const [camError, setCamError] = useState(false)
 
+  // Effect 1：请求摄像头权限，open 变化时触发
   useEffect(() => {
     if (!open) {
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-      streamRef.current = null
+      // 关闭时停止所有轨道
+      stream?.getTracks().forEach((t) => t.stop())
+      setStream(null)
       setReady(false)
       setCamError(false)
       return
     }
 
-    // 不限制 facingMode，提升 Android 兼容性
+    let cancelled = false
+
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
-      .then((stream) => {
-        streamRef.current = stream
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current!.play()
-            setReady(true)
-          }
-        }
+      .then((s) => {
+        if (cancelled) { s.getTracks().forEach((t) => t.stop()); return }
+        setStream(s)
       })
       .catch(() => {
-        // 显示错误状态而不是立刻 onClose()
-        // 让用户主动点"关闭"，保证 touchend 能正常走完 useLongPress 的 reset 流程
-        setCamError(true)
+        if (!cancelled) setCamError(true)
       })
+
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
+
+  // Effect 2：stream 就绪后绑定到 video 元素
+  // 此时 React 已完成 commit，videoRef.current 必然存在
+  useEffect(() => {
+    if (!stream || !videoRef.current) return
+    const video = videoRef.current
+    video.srcObject = stream
+
+    const onReady = () => setReady(true)
+    video.addEventListener("canplay", onReady, { once: true })
+
+    // 如果 canplay 在监听器注册前已经触发（readyState >= 3 = HAVE_FUTURE_DATA）
+    if (video.readyState >= 3) {
+      setReady(true)
+    } else {
+      video.play().catch(() => {})
+    }
+
+    return () => video.removeEventListener("canplay", onReady)
+  }, [stream])
 
   const capture = () => {
     if (!videoRef.current || !ready) return
@@ -76,7 +94,6 @@ export default function SelfieMode({ open, colors, onCapture, onClose }: SelfieP
           {flash && <div className="absolute inset-0 z-50 bg-white pointer-events-none" />}
 
           {camError ? (
-            /* 错误状态：让用户主动关闭，不自动消失 */
             <div className="flex flex-col items-center gap-6 px-8 text-center">
               <span style={{ fontSize: 64 }}>📷</span>
               <p className="text-white text-lg font-semibold">无法访问摄像头</p>
@@ -100,6 +117,12 @@ export default function SelfieMode({ open, colors, onCapture, onClose }: SelfieP
                   playsInline
                   muted
                 />
+                {/* 摄像头加载中提示 */}
+                {!ready && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white/40 text-sm tracking-widest">加载中…</span>
+                  </div>
+                )}
                 <div
                   className="absolute bottom-6 right-6 text-6xl opacity-80 pointer-events-none"
                   style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}
