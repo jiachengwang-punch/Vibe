@@ -73,34 +73,34 @@ function computeVibeColor(hour: number): VibeColorScheme {
       thumbTint: "#B5EAD7",
     }
   } else if (hour >= 8 && hour < 12) {
-    // Morning: warm lemon + peach
+    // Morning: 天空蓝 + 海沫绿，冷色衬出橙红主角
     return {
-      bg: "#FFF4C2",
-      bgEnd: "#FECBA1",
-      accent: "#FB923C",
-      accentGlow: "rgba(251,146,60,0.4)",
-      text: "#7C3A10",
-      thumbTint: "#FDE68A",
+      bg: "#C8E8FF",
+      bgEnd: "#B4EED8",
+      accent: "#38BDF8",
+      accentGlow: "rgba(56,189,248,0.4)",
+      text: "#0C4A6E",
+      thumbTint: "#7DD3FC",
     }
   } else if (hour >= 12 && hour < 17) {
-    // Afternoon: dopamine — electric coral + cyan
+    // Afternoon: 丁香紫 + 薄荷，低饱和对比色让橙红跳跃
     return {
-      bg: "#FF6B6B",
-      bgEnd: "#4ECDC4",
-      accent: "#FFE66D",
-      accentGlow: "rgba(255,230,109,0.5)",
-      text: "#FFFFFF",
-      thumbTint: "#FFE66D",
+      bg: "#C4B5FD",
+      bgEnd: "#A7F3D0",
+      accent: "#818CF8",
+      accentGlow: "rgba(129,140,248,0.45)",
+      text: "#2E1065",
+      thumbTint: "#C7D2FE",
     }
   } else if (hour >= 17 && hour < 21) {
-    // Evening: sunset orange + deep rose
+    // Evening: 深海蓝 + 靛紫，像灯塔映衬橙红
     return {
-      bg: "#FF8C42",
-      bgEnd: "#C62A6B",
-      accent: "#FFD93D",
-      accentGlow: "rgba(255,217,61,0.45)",
+      bg: "#1E3A5F",
+      bgEnd: "#3B1F6A",
+      accent: "#60A5FA",
+      accentGlow: "rgba(96,165,250,0.45)",
       text: "#FFFFFF",
-      thumbTint: "#FFD93D",
+      thumbTint: "#93C5FD",
     }
   } else {
     // Night: electric purple + deep violet（告别压抑深蓝，换成多巴胺紫）

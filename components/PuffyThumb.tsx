@@ -7,14 +7,16 @@ import { useCursorKinetics } from "@/hooks/useCursorKinetics"
 import { useHaptic } from "@/hooks/useHaptic"
 import { VibeColorScheme } from "@/hooks/useVibeColor"
 
-// ── 材质阶段 ──────────────────────────────────────────────────
-type ThumbStage = "rubber" | "latex" | "metal" | "jelly"
+// ── 暖色演化阶段 ──────────────────────────────────────────────
+// line   Day 1-7  ：香槟金线条，若隐若现
+// amber  Day 8-21 ：琥珀半透，光能穿过
+// solid  Day 22+  ：充气实体，橙红 3D 奖杯
+type ThumbStage = "line" | "amber" | "solid"
 
 function getStage(day: number): ThumbStage {
-  if (day <= 7) return "rubber"
-  if (day <= 99) return "latex"
-  if (day <= 364) return "metal"
-  return "jelly"
+  if (day <= 7) return "line"
+  if (day <= 21) return "amber"
+  return "solid"
 }
 
 
@@ -55,8 +57,8 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress, res
   const scaleControls = useAnimation()
 
   const stage = getStage(day)
-  // 雾面橡胶气不足，体积稍小
-  const baseScale = stage === "rubber" ? 0.88 : 1.0
+  // line 阶段体积最小，随天数充气长大
+  const baseScale = stage === "line" ? 0.84 : stage === "amber" ? 0.94 : 1.0
 
   // 呼吸动效：通过 controls 管理，这样 pop 可以无缝打断它
   const startBreathing = useCallback(async () => {
@@ -137,24 +139,24 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress, res
   const squishX = 1 + pressProgress * 0.30
   const squishY = 1 - pressProgress * 0.30
 
-  // 各阶段 CSS filter：三层 drop-shadow 叠出充气体积感
+  // 各阶段 filter：暖色轴演化
   const EMOJI_FILTER: Record<ThumbStage, string> = {
-    rubber:
-      "saturate(0.28) brightness(0.84) drop-shadow(0 2px 0 rgba(0,0,0,0.28)) drop-shadow(0 6px 10px rgba(0,0,0,0.16)) drop-shadow(0 16px 28px rgba(0,0,0,0.10))",
-    latex:
-      "saturate(1.25) brightness(1.10) drop-shadow(0 3px 0 rgba(0,0,0,0.32)) drop-shadow(0 10px 18px rgba(0,0,0,0.22)) drop-shadow(0 28px 48px rgba(0,0,0,0.14))",
-    metal:
-      "saturate(0.06) brightness(1.72) contrast(1.28) drop-shadow(0 3px 0 rgba(0,0,0,0.35)) drop-shadow(0 10px 20px rgba(180,180,200,0.45)) drop-shadow(0 28px 50px rgba(150,150,180,0.22))",
-    jelly:
-      "brightness(1.14) saturate(0.45) opacity(0.76) drop-shadow(0 3px 0 rgba(100,0,200,0.22)) drop-shadow(0 10px 20px rgba(120,60,255,0.30)) drop-shadow(0 28px 48px rgba(80,0,200,0.16))",
+    // 香槟金线条：高亮度低饱和，像通电的细霓虹
+    line:
+      "saturate(0.18) brightness(2.1) drop-shadow(0 0 8px rgba(251,215,134,0.9)) drop-shadow(0 4px 14px rgba(251,215,134,0.55)) drop-shadow(0 12px 28px rgba(251,215,134,0.28))",
+    // 琥珀半透：暖饱和度提升，光能穿过
+    amber:
+      "saturate(1.45) brightness(1.12) hue-rotate(-10deg) drop-shadow(0 3px 0 rgba(255,126,95,0.45)) drop-shadow(0 10px 20px rgba(255,100,70,0.32)) drop-shadow(0 28px 48px rgba(255,80,50,0.18))",
+    // 充气实体：强饱和 + 偏红，厚重 3D 奖杯感
+    solid:
+      "saturate(2.4) brightness(0.92) hue-rotate(-20deg) contrast(1.18) drop-shadow(0 4px 0 rgba(200,30,20,0.45)) drop-shadow(0 14px 26px rgba(255,78,80,0.40)) drop-shadow(0 32px 56px rgba(255,78,80,0.22))",
   }
 
-  // 光晕颜色
+  // 环境光晕颜色
   const GLOW: Record<ThumbStage, string> = {
-    rubber: "rgba(140,140,140,0.22)",
-    latex: colors.accentGlow,
-    metal: "rgba(210,210,225,0.32)",
-    jelly: "rgba(120,60,255,0.28)",
+    line: "rgba(251,215,134,0.32)",
+    amber: "rgba(255,126,95,0.38)",
+    solid: "rgba(255,65,108,0.35)",
   }
 
   return (
@@ -198,18 +200,17 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress, res
             <div style={{ position: "relative", display: "inline-block", fontSize: 0, lineHeight: 0 }}>
               <span
                 style={{
-                  fontSize: stage === "rubber" ? "144px" : stage === "latex" ? "164px" : "158px",
-                  lineHeight: stage === "rubber" ? "144px" : stage === "latex" ? "164px" : "158px",
+                  fontSize: stage === "line" ? "138px" : stage === "amber" ? "152px" : "164px",
+                  lineHeight: stage === "line" ? "138px" : stage === "amber" ? "152px" : "164px",
                   display: "block",
                   filter: EMOJI_FILTER[stage],
                 }}
               >
                 👍
               </span>
-              {/* rubber 无高光（雾面不反光） */}
-              {stage === "latex" && <LatexGloss />}
-              {stage === "metal" && <MetalShimmer />}
-              {stage === "jelly" && <JellyRainbow />}
+              {stage === "line" && <LineNeon />}
+              {stage === "amber" && <AmberJelly />}
+              {stage === "solid" && <SolidFlame />}
             </div>
 
           </motion.div>
@@ -254,27 +255,52 @@ export default function PuffyThumb({ day, colors, onShortPress, onLongPress, res
   )
 }
 
-// ── 材质叠层 ──────────────────────────────────────────────────
+// ── 暖色叠层 ──────────────────────────────────────────────────
 
-/** 高光乳胶：左上角强高光 */
-function LatexGloss() {
+/** 香槟金霓虹：柔和的金色内发光，若隐若现 */
+function LineNeon() {
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background:
+          "radial-gradient(ellipse 62% 54% at 38% 26%, rgba(253,235,160,0.82) 0%, rgba(253,220,120,0.38) 38%, transparent 60%)",
+        mixBlendMode: "screen",
+      }}
+      animate={{ opacity: [0.55, 1, 0.55] }}
+      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+    />
+  )
+}
+
+/** 琥珀果冻：暖橙半透，光穿过 + 细白高光边 */
+function AmberJelly() {
   return (
     <>
-      {/* 主高光：screen 混合比 overlay 更亮，更像气球反光 */}
+      {/* 琥珀暖光 */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 58% 48% at 31% 20%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.38) 28%, transparent 52%)",
+            "radial-gradient(ellipse 65% 55% at 36% 24%, rgba(255,185,120,0.60) 0%, rgba(255,130,85,0.32) 44%, transparent 65%)",
           mixBlendMode: "screen",
         }}
       />
-      {/* 底部暗边：增强球体弧面感 */}
+      {/* 白色细高光 — 像被阳光勾过的边 */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 62% 82%, rgba(0,0,0,0.18) 0%, transparent 55%)",
+            "radial-gradient(ellipse 38% 28% at 28% 16%, rgba(255,255,255,0.62) 0%, transparent 58%)",
+          mixBlendMode: "screen",
+        }}
+      />
+      {/* 底部轻暗边，增加果冻弧面感 */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 58% 45% at 60% 84%, rgba(180,60,20,0.16) 0%, transparent 55%)",
           mixBlendMode: "multiply",
         }}
       />
@@ -282,49 +308,39 @@ function LatexGloss() {
   )
 }
 
-/** 液态金属：静态高光 + 扫光动画 */
-function MetalShimmer() {
+/** 充气实体：右上角白色光源 + 橙红弥散阴影 */
+function SolidFlame() {
   return (
     <>
-      {/* 静态镜面 */}
+      {/* 右上角主光源：让大色块变成"奖杯"不是"图案" */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 54% 44% at 37% 25%, rgba(255,255,255,0.64) 0%, rgba(255,255,255,0.06) 48%, transparent 70%)",
+            "radial-gradient(ellipse 48% 40% at 70% 14%, rgba(255,255,255,0.78) 0%, rgba(255,225,100,0.42) 28%, transparent 55%)",
           mixBlendMode: "screen",
         }}
       />
-      {/* 扫光 */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ borderRadius: 4 }}>
-        <motion.div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(108deg, transparent 20%, rgba(255,255,255,0.65) 50%, transparent 80%)",
-            mixBlendMode: "screen",
-          }}
-          animate={{ x: ["-130%", "230%"] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "linear", repeatDelay: 1.8 }}
-        />
-      </div>
+      {/* 底部热红暗边：强化 3D 充气球体感 */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 62% 52% at 48% 88%, rgba(160,20,20,0.24) 0%, transparent 58%)",
+          mixBlendMode: "multiply",
+        }}
+      />
+      {/* 弥散光晕（在 emoji 下方 40px 扩散） */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          inset: "20px -20px -40px -20px",
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% 85%, rgba(255,78,80,0.28) 0%, transparent 65%)",
+          filter: "blur(12px)",
+          mixBlendMode: "normal",
+        }}
+      />
     </>
-  )
-}
-
-/** 幻彩果冻：旋转彩虹 conic-gradient */
-function JellyRainbow() {
-  return (
-    <motion.div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          "conic-gradient(from 0deg, rgba(255,55,55,0.30), rgba(255,200,0,0.30), rgba(55,255,120,0.30), rgba(30,145,255,0.30), rgba(200,30,255,0.30), rgba(255,55,55,0.30))",
-        mixBlendMode: "screen",
-      }}
-      animate={{ rotate: 360 }}
-      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-    />
   )
 }
